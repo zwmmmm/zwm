@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = ".;helloworld"; // ;前面的表示生成pb.go文件的路径，分号后面问生成的go文件包名
+
+import "github.com/mwitkow/go-proto-validators@v0.3.2/validator.proto";  // 导入 validator.proto
+
+// The greeting service definition
+service Greeter {
+    // Sends a greeting
+    rpc SayHello (HelloRequest) returns (HelloReply) {}
+    // Sends stream message
+    rpc SayHelloStream (stream HelloRequest) returns (stream HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest{
+    string name = 1 [  // [] 用于定义 扩展选项
+        (validator.field) = {regex: "^[z]{2,5}$"}
+    ];
+}
+
+// The reponse message containing the greetings.
+message HelloReply {
+    string reply = 1;
+}
+
+// 基础代码时使用，只指定一个helloworld.proto
+// protoc --go_out=. --go-grpc_out=. helloworld.proto
+// --go_out=.  生成与 Protocol Buffers 数据结构相关的代码，例如消息类型定义和序列化方法
+// --go-grpc_out=.  生成与 gRPC 服务相关的代码，例如服务接口和客户端代码
+
+
+// 使用validator时使用这个，多次使用--proto_path来指定多个proto文件
+// protoc \
+// --proto_path=${GOPATH}/pkg/mod \
+// --proto_path=${GOPATH}/pkg/mod/github.com/gogo/protobuf@v1.3.2 \
+// --proto_path=. \
+// --govalidators_out=. \
+// --go_out=. \
+// --go-grpc_out=. \
+// *.proto
